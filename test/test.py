@@ -13,7 +13,6 @@ import BaseHTTPServer
 from threading import Thread
 
 
-TEST_CONF = 'nginx-test.conf'
 TEST_HOST = 'localhost'
 TEST_PORT = 4443
 TEST_SETTINGS = {
@@ -23,6 +22,9 @@ TEST_SETTINGS = {
 NGINX_WARMUP_TIME = 1
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
+RUN_DIR = SCRIPT_DIR + '/../_run'
+SERVERS_DIR = SCRIPT_DIR +'/../src/servers'
+TEST_CONFIG_FILE = SCRIPT_DIR + '/nginx-test.conf'
 
 
 class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
@@ -204,28 +206,28 @@ def replace_key(key, value, string):
   return re.sub('\\{\\{\\s*' + key + '\\s*\\}\\}', value, string)
 
 
+def render_file(path, suites):
+  with open(path, 'r+') as file:
+    data = file.read()
+    for key, value in TEST_SETTINGS.iteritems():
+      data = replace_key(key, value, data)
+    for suite in suites:
+      data = replace_key(suite.service, suite.url, data)
+    file.seek(0)
+    file.write(data)
+    file.truncate()
+
+
 def prepare_environment(suites):
-  run_dir = SCRIPT_DIR + '/../_run'
-  servers_dir = SCRIPT_DIR +'/../src/servers'
-  test_config_file = SCRIPT_DIR + '/' + TEST_CONF
+  shutil.rmtree(RUN_DIR, ignore_errors = True)
+  shutil.copytree(SERVERS_DIR, RUN_DIR + '/servers')
+  shutil.copy(TEST_CONFIG_FILE, RUN_DIR)
 
-  shutil.rmtree(run_dir, ignore_errors = True)
-  shutil.copytree(servers_dir, run_dir + '/servers')
-  shutil.copy(test_config_file, run_dir)
-
-  for config_file in glob.glob(run_dir + '/**/*'):
+  for config_file in glob.glob(RUN_DIR + '/**/*'):
     if os.path.isfile(config_file):
-      with open(config_file, 'r+') as file:
-        data = file.read()
-        for key, value in TEST_SETTINGS.iteritems():
-          data = replace_key(key, value, data)
-        for suite in suites:
-          data = replace_key(suite.service, suite.url, data)
-        file.seek(0)
-        file.write(data)
-        file.truncate()
+      render_file(config_file, suites)
 
-  return run_dir + '/' + TEST_CONF
+  return RUN_DIR + '/' + os.path.basename(TEST_CONFIG_FILE)
 
 
 def run():
