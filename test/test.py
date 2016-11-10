@@ -177,10 +177,7 @@ def run_tests(suites):
   for suite in suites:
     suite.setup()
 
-  all_tests = []
-  for suite in suites:
-    for test in suite.tests():
-      all_tests.append(test)
+  all_tests = [test for suite in suites for test in suite.tests()]
 
   for test in all_tests:
     hit = test.run() and test.hit()
