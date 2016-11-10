@@ -1,16 +1,16 @@
 #!/usr/bin/env python
 
-import BaseHTTPServer
-import yaml
 import os
-import glob
-from threading import Thread
 import re
-import httplib
+import glob
+import time
+import yaml
 import shutil
 import signal
+import httplib
 import subprocess
-import time
+import BaseHTTPServer
+from threading import Thread
 
 
 TEST_CONF = 'nginx-test.conf'
