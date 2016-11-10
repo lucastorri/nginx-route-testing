@@ -79,11 +79,10 @@ class Test:
     path = match.group(2)
 
     conn = httplib.HTTPConnection('{0}:{1}'.format(TEST_HOST, TEST_PORT))
-    conn.request(method, path, '')
+    conn.request(method, path)
     r = conn.getresponse()
-    status = r.status
     conn.close()
-    return status == 200
+    return r.status == 200
 
   def hit(self):
     hit = self.suite.server.request_received()
