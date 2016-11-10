@@ -14,7 +14,7 @@ from threading import Thread
 
 
 TEST_HOST = 'localhost'
-TEST_PORT = 4443
+TEST_PORT = 7000
 TEST_SETTINGS = {
   'server_name': TEST_HOST
 }

@@ -1,6 +1,6 @@
 
 server {
-  listen 4443;
+  listen 7000;
   server_name {{ server_name }};
 
   location / {
