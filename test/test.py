@@ -142,18 +142,8 @@ class Nginx:
     os.killpg(os.getpgid(self.pro.pid), signal.SIGTERM)
 
 
-def load_test_suites():
-  test_files = glob.glob(SCRIPT_DIR + '/*.test')
+class Console:
 
-  suites = []
-  for i, test_file in enumerate(test_files):
-    with open(test_file, 'r') as file:
-      suites.append(TestSuite(i, file))
-
-  return suites
-
-
-class bcolors:
   HEADER = '\033[95m'
   OKBLUE = '\033[94m'
   OKGREEN = '\033[92m'
@@ -163,12 +153,23 @@ class bcolors:
   BOLD = '\033[1m'
   UNDERLINE = '\033[4m'
 
+  @staticmethod
+  def report(success, test, msg=None):
+    color = Console.OKGREEN if success else Console.FAIL
+    title = '  OK' if success else 'FAIL'
+    extra = '' if not msg else ' [' + msg + ']'
+    print('[' + color + title + Console.ENDC + '] ' + str(test) + extra)
 
-def report(success, test, msg=None):
-  color = bcolors.OKGREEN if success else bcolors.FAIL
-  title = '  OK' if success else 'FAIL'
-  extra = '' if not msg else ' [' + msg + ']'
-  print('[' + color + title + bcolors.ENDC + '] ' + str(test) + extra)
+
+def load_test_suites():
+  test_files = glob.glob(SCRIPT_DIR + '/*.test')
+
+  suites = []
+  for i, test_file in enumerate(test_files):
+    with open(test_file, 'r') as file:
+      suites.append(TestSuite(i, file))
+
+  return suites
 
 
 def run_tests(suites):
@@ -188,11 +189,11 @@ def run_tests(suites):
     if not hit:
       success = False
       if other_hit:
-        report(False, test, 'hit {0} instead'.format(other_hit.suite.service))
+        Console.report(False, test, 'hit {0} instead'.format(other_hit.suite.service))
       else:
-        report(False, test, 'no hit')
+        Console.report(False, test, 'no hit')
     else:
-      report(bcolors.OKGREEN, test)
+      Console.report(True, test)
 
   for suite in suites:
     suite.tear_down()
