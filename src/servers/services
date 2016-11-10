@@ -1,0 +1,14 @@
+
+server {
+  listen 4443;
+  server_name {{ server_name }};
+
+  location / {
+    proxy_pass {{ service_1 }};
+  }
+
+  location /devices {
+    proxy_pass {{ service_2 }};
+  }
+
+}
